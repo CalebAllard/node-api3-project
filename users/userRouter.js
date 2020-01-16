@@ -1,18 +1,36 @@
 const express = require('express');
-const {validateUserId,ValidateUser} = require('../middleware');
+const {validateUserId,validateUser,validatePost} = require('../middleware');
 const router = express.Router();
 const db = require('./userDb');
-
-router.post('/', (req, res) => {
-  // do your magic!
+const postsDb = require('../posts/postDb');
+router.post('/', validateUser, (req, res) => {
+  db.insert(req.body)
+    .then(resp => {
+      res.status(201).json(resp);
+    })
+    .catch(err => {
+      res.status(500).json({errMessage: 'Error adding user'});
+    })
 });
 
-router.post('/:id/posts', (req, res) => {
-  // do your magic!
+router.post('/:id/posts', validatePost, (req, res) => {
+  postsDb.insert(req.body)
+    .then(resp => {
+      res.status(201).json(resp);
+    })
+    .catch(err => {
+      res.status(500).json({errMessage:"We  had a problem adding your post"})
+    });
 });
 
 router.get('/', (req, res) => {
-  // do your magic!
+  const { id } = req.params;
+  db.get(id).then(resp => {
+    res.status(200).json(resp);
+  })
+  .catch(err => {
+    res.status(500).json({err: 'Err getting users from database'});
+  });
 });
 
 router.get('/:id', validateUserId, (req, res) => {
